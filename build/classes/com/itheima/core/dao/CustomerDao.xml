@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+     "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.core.dao.CustomerDao">
+    <!--SQL片段  -->
+    <sql id="selectCustomerListWhere">
+        <where>
+        <if test="cust_tid !=null">
+        	cust_tid = #{cust_tid} 
+        </if>
+	       <if test="cust_name != null" >
+	          and cust_name like "%"#{cust_name}"%"
+	       </if>
+	       <if test="cust_institute != null" >
+	        and cust_institute = #{cust_institute}
+	       </if>
+	       <if test="cust_post != null" >
+	        and cust_post = #{cust_post}
+	       </if>
+	       <if test="cust_grade != null" >
+	        and cust_grade = #{cust_grade}
+	       </if>
+        </where>
+    </sql>
+	<!-- 查询客户列表  -->
+	<select id="selectCustomerList" parameterType="customer" 
+                                           resultType="customer">
+		SELECT
+			cust_id,
+			cust_tid,
+			cust_name,
+			b.dict_item_name cust_institute,
+			c.dict_item_name cust_post,
+			d.dict_item_name cust_grade,
+			cust_wages,
+			cust_mobile,
+			cust_address,
+			cust_createtime
+		FROM
+			customers a
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base
+			WHERE
+				dict_type_code = '001'
+		) b ON a.cust_institute = b.dict_id
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base
+			WHERE
+				dict_type_code = '002'
+		) c ON a.cust_post = c.dict_id
+		LEFT JOIN (
+			SELECT
+				dict_id,
+				dict_item_name
+			FROM
+				base
+			WHERE
+				dict_type_code = '003'
+		) d ON a.cust_grade = d.dict_id 
+		<include refid="selectCustomerListWhere"/>
+		<!-- 执行分页查询 -->
+		<if test="start !=null and rows != null">
+			limit #{start},#{rows}
+		</if>
+	</select>
+	
+	<!-- 查询客户总数 -->
+	<select id="selectCustomerListCount" parameterType="customer" 
+                                                 resultType="Integer">
+		select count(*) from customers
+		<include refid="selectCustomerListWhere"/>
+	</select>	
+	
+	<!-- 添加客户 -->
+	<insert id="createCustomer" parameterType="customer">
+	    insert into customers(
+	    				cust_tid,
+	                     cust_name,
+	                     cust_institute,
+	                     cust_post,
+	                     cust_grade,
+	                     cust_wages,
+	                     cust_mobile,
+	                     cust_address,
+	                     cust_createtime
+	             )
+	             values(
+	             		 #{cust_tid},
+	             		#{cust_name},
+	                    #{cust_institute},
+	                    #{cust_post},
+	                    #{cust_grade},
+	                    #{cust_wages},
+	                    #{cust_mobile},
+	                    #{cust_address},
+	                    #{cust_createtime}
+	            )
+	</insert>
+	<!-- 根据id获取客户信息 -->
+	<select id="getCustomerById" parameterType="Integer" 
+	resultType="customer">
+	    select * from customers where cust_id = #{id}
+	</select>
+	<!-- 更新客户 -->
+	<update id="updateCustomer" parameterType="customer">
+	    update customers
+	    <set>
+	    	<if test="cust_tid!=null">
+	            cust_tid=#{cust_tid},
+	        </if>
+	        <if test="cust_name!=null">
+	            cust_name=#{cust_name},
+	        </if>
+	        <if test="cust_institute!=null">
+	            cust_institute=#{cust_institute},
+	        </if>
+	        <if test="cust_post!=null">
+	            cust_post=#{cust_post},
+	        </if>
+	        <if test="cust_grade!=null">
+	            cust_grade=#{cust_grade},
+	        </if>
+	        <if test="cust_wages!=null">
+	            cust_wages=#{cust_wages},
+	        </if>
+	        <if test="cust_mobile!=null">
+	            cust_mobile=#{cust_mobile},
+	        </if>
+	        <if test="cust_address!=null">
+	            cust_address=#{cust_address},
+	        </if>
+	        <if test="cust_createtime!=null">
+	            cust_createtime=#{cust_createtime},
+	        </if>
+	    </set>
+	    where cust_id=#{cust_id}
+	</update>
+	<!-- 删除客户 -->
+	<delete id="deleteCustomer" parameterType="Integer">
+	    delete from customers where cust_id=#{id}
+	</delete>
+</mapper>
